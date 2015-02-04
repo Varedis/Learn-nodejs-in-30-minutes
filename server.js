@@ -1,29 +1,35 @@
-var express = require('express');
+var express = require('express'),
+    mongoose = require('mongoose');
+
+// MODELS
+var User = require('./models/user');
+
+mongoose.connect('mongodb://myUser:myPassword@ds039441.mongolab.com:39441/learn-nodejs');
+var db = mongoose.connection;
+
 var app = express();
 
 app.get('/', function(request, response) {
-    response.write("<h1>Welcome to our amazing website</h1>");
-    response.end();
+    var user = new User();
+    user.email = 'test1@hotmail.com';
+    user.username = 'test1';
+    user.password = 'password';
+    user.first_name = 'test';
+    user.last_name = 'user';
+    user.save();
+
+    response.end("User Created");
 });
 
-app.get('/about', function(request, response) {
-    response.write("<h1>About Us!</h1>");
-    response.end();
-});
+app.get('/api/user/:id', function(request, response) {
+    User.getUserById(request.params.id, function(err, doc) {
+        if(err) {
+            console.error(err);
+            return;
+        }
 
-app.get('/api/users', function(request, response) {
-    response.json({ "message": "We could display a list of users here for an api" });
-    response.end();
-});
-
-app.post('/api/user/', function(request, response) {
-    response.json({ "message": "An example post request" });
-    response.end();
-});
-
-app.delete('/api/user/:id', function(request, response) {
-    response.json({ "message": "An example delete request for a certain user" });
-    response.end();
+        response.json(doc);
+    });
 });
 
 app.listen(3000);
